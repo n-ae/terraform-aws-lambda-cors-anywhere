@@ -54,7 +54,7 @@ EOT
 
 module "aws" {
   source        = "./aws"
-  stage         = var.stage
+  function_name = var.function_name
   allow_origins = var.allow_origins
 
   depends_on = [
