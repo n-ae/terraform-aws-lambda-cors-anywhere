@@ -53,7 +53,7 @@ EOT
 }
 
 module "aws" {
-  source        = "./aws"
+  source        = "./modules/aws"
   function_name = var.function_name
   allow_origins = var.allow_origins
 

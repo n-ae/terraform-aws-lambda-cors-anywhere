@@ -34,5 +34,8 @@ override.tf.json
 terraform.rc
 
 
+### dist
+dist
+
 ### for Mac
 **/.DS_Store
