@@ -1,6 +1,6 @@
 
 locals {
-  module_abs_path = abspath("${path.module}")
+  module_abs_path = path.module
   dist_path       = "${local.module_abs_path}/../../dist"
   package_path    = "${local.dist_path}/bootstrap.zip"
 }

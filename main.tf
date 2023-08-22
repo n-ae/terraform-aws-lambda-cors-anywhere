@@ -1,8 +1,9 @@
 locals {
-  module_abs_path = abspath(path.module)
+  dist_path = "dist"
   path = {
-    dist         = "${local.module_abs_path}/dist"
-    package_file = abspath("${local.module_abs_path}/bootstrap.zip")
+    dist         = local.dist_path
+    git          = "${local.dist_path}/tmp.git"
+    package_file = "${local.dist_path}/bootstrap.zip"
   }
 }
 
@@ -18,9 +19,14 @@ resource "terraform_data" "dist" {
   }
 
   provisioner "local-exec" {
-    working_dir = local.module_abs_path
+    working_dir = path.module
     command     = <<-EOT
-git clone --depth 1 --branch ${self.input.cors_anywhere_version} git@github.com:Rob--W/cors-anywhere.git ${self.input.path.dist} &2>/dev/null
+mktemp -d --tmpdir=${self.input.path.git}
+git --work-tree=${self.input.path.dist} clone --depth=1 \
+  --branch ${self.input.cors_anywhere_version} \
+  git@github.com:Rob--W/cors-anywhere.git \
+  ${self.input.path.git}
+rm -rf ${self.input.path.git}
 EOT
     interpreter = [
       "sh",
@@ -29,10 +35,12 @@ EOT
   }
 
   provisioner "local-exec" {
-    working_dir = self.input.path.dist
+    working_dir = path.module
     command     = <<-EOT
-cp ${local.module_abs_path}/aws_lambda_wrapper/index.js .
-. ${local.module_abs_path}/aws_lambda_wrapper/build.sh
+pushd ${self.input.path.dist}
+cp ../aws_lambda_wrapper/index.js .
+. ../aws_lambda_wrapper/build.sh
+popd
 EOT
     interpreter = [
       "sh",
@@ -41,8 +49,9 @@ EOT
   }
 
   provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
+    when        = destroy
+    working_dir = path.module
+    command     = <<-EOT
 rm -rf ${self.input.path.dist}
 EOT
     interpreter = [
