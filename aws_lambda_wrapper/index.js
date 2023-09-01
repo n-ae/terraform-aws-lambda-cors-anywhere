@@ -12,6 +12,7 @@ exports.handler = async function (event, context, callback) {
     acc[key.toLowerCase()] = value;
     return acc;
   }, {});
+  // headers['x-requested-with'] = 'XMLHttpRequest';
   const axiosConfig = {
     method: event.requestContext.http.method,
     // url: event.requestContext.http.path.slice(1) + '?' + event.rawQueryString,
@@ -21,10 +22,26 @@ exports.handler = async function (event, context, callback) {
     // params: requestData.queryStringParameters,
   };
   console.log('axiosConfig:', JSON.stringify(axiosConfig));
-  const response = await axios(axiosConfig);
+  try {
+    const response = await axios(axiosConfig);
+    console.log('Response:', JSON.stringify(response.data));
+    return response.data;
+  }
+  catch (error) {
+    console.log('ErrResponse2:', error.toJSON());
+    console.log('ErrResponse22:', error.response);
+    // return context.fail(error);
+    // return context.fail(error.response);
+    // return context.done(error.response);
+    return {
+      statusCode: error.response.status,
+      // body: JSON.stringify(error.response.data),
+      body: error.response.data,
+    };
+    // return error.response;
+    // return error.toJSON();
+  }
 
-  console.log('Response:', JSON.stringify(response.data));
-  return response.data;
   // callback(null, event);
   // or
   // callback( 'some error type' );

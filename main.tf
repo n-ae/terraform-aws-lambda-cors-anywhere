@@ -22,7 +22,8 @@ resource "terraform_data" "dist" {
     working_dir = path.module
     command     = <<-EOT
 mktemp -d --tmpdir=${self.input.path.git}
-git --work-tree=${self.input.path.dist} clone --depth=1 \
+git -c advice.detachedHead=false \
+  --work-tree=${self.input.path.dist} clone --depth=1 \
   --branch ${self.input.cors_anywhere_version} \
   git@github.com:Rob--W/cors-anywhere.git \
   ${self.input.path.git}
